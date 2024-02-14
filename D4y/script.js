@@ -20,23 +20,38 @@ $(function () {
   // attribute of each time-block be used to do this?
   //
   // TODO: Add code to display the current date in the header of the page.
-});
-<!-- HTML: Basic structure for reference -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Planner</title>
-    <link rel="stylesheet" href="style.css"> <!-- Assumed CSS file -->
-    <script src="https://cdn.jsdelivr.net/npm/dayjs/dayjs.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
-    <header>
-        <h1 id="currentDay"></h1>
-    </header>
-    <div id="timeBlocks"></div>
-    <script src="script.js"></script> <!-- JavaScript file -->
-</body>
-</html>
+$(function () {
+  // Display the current date
+  $('#currentDay').text(dayjs().format('dddd, MMMM D, YYYY'));
+
+  function updateHourStatus() {
+    // Get the current hour in 24-hour format
+    var currentHour = dayjs().hour();
+
+    // Loop through each time-block
+    $('.time-block').each(function () {
+      var blockHour = parseInt($(this).attr('id').replace('hour-', ''));
+      
+      // Remove any old classes from element
+      $(this).removeClass('past present future');
+
+      // Apply new class based on time comparison
+      if (blockHour < currentHour) {
+        $(this).addClass('past');
+      } else if (blockHour === currentHour) {
+        $(this).addClass('present');
+      } else {
+        $(this).addClass('future');
+      }
+    });
+  }
+
+  // Call updateHourStatus on page load
+  updateHourStatus();
+  // Optionally, you could call updateHourStatus() at a regular interval
+
+  // Load saved events from localStorage
+  $('.time-block').each(function () {
+    var id = $(this).attr('id');
+    if (localStorage.getItem(id)) {
+      $(this).find
