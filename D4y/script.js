@@ -21,37 +21,50 @@ $(function () {
   //
   // TODO: Add code to display the current date in the header of the page.
 $(function () {
-  // Display the current date
-  $('#currentDay').text(dayjs().format('dddd, MMMM D, YYYY'));
+    // Display the current date
+    $('#currentDay').text(dayjs().format('dddd, MMMM D, YYYY'));
 
-  function updateHourStatus() {
-    // Get the current hour in 24-hour format
-    var currentHour = dayjs().hour();
+    // Dynamically generate time blocks for 9AM to 5PM
+    const timeBlocksContainer = $('#timeBlocks');
+    for (let hour = 9; hour <= 17; hour++) {
+        const timeBlock = $('<div>').addClass('row time-block')
+            .attr('id', `hour-${hour}`);
+        const displayHour = hour <= 12 ? `${hour}AM` : `${hour - 12}PM`;
 
-    // Loop through each time-block
+        timeBlock.append($('<div>').addClass('col-md-1 hour').text(displayHour),
+            $('<textarea>').addClass('col-md-10 description'),
+            $('<button>').addClass('saveBtn col-md-1').html('<i class="fas fa-save"></i>'));
+        timeBlocksContainer.append(timeBlock);
+    }
+
+    // Apply past, present, or future class
     $('.time-block').each(function () {
-      var blockHour = parseInt($(this).attr('id').replace('hour-', ''));
-      
-      // Remove any old classes from element
-      $(this).removeClass('past present future');
+        const blockHour = parseInt($(this).attr('id').split('-')[1]);
+        const currentHour = dayjs().hour();
 
-      // Apply new class based on time comparison
-      if (blockHour < currentHour) {
-        $(this).addClass('past');
-      } else if (blockHour === currentHour) {
-        $(this).addClass('present');
-      } else {
-        $(this).addClass('future');
-      }
+        if (blockHour < currentHour) {
+            $(this).addClass('past');
+        } else if (blockHour === currentHour) {
+            $(this).addClass('present');
+        } else {
+            $(this).addClass('future');
+        }
     });
-  }
 
-  // Call updateHourStatus on page load
-  updateHourStatus();
-  // Optionally, you could call updateHourStatus() at a regular interval
+    // Click event for save button
+    $('.saveBtn').click(function () {
+        const hourId = $(this).parent().attr('id');
+        const textValue = $(this).siblings('.description').val();
+        localStorage.setItem(hourId, textValue);
+    });
 
-  // Load saved events from localStorage
-  $('.time-block').each(function () {
-    var id = $(this).attr('id');
-    if (localStorage.getItem(id)) {
-      $(this).find
+    // Load saved data
+    $('.time-block').each(function () {
+        const hourId = $(this).attr('id');
+        const savedText = localStorage.getItem(hourId);
+        if (savedText) {
+            $(this).find('.description').val(savedText);
+        }
+    });
+});
+});
